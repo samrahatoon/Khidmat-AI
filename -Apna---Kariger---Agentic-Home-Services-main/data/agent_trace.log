@@ -1,0 +1,80 @@
+[2026-05-17T03:45:00] [System] Processing Service Request: "Mujhe kal subah G-13 mein AC technician chahiye"
+[2026-05-17T03:45:01] [IntentAgent] Parsing query...
+[2026-05-17T03:45:01] [IntentAgent] Identified Language: Urdu/Hindi (Roman)
+[2026-05-17T03:45:01] [IntentAgent] Extracted Intent: AC Technician (Matches keywords in data/intent_keywords.json)
+[2026-05-17T03:45:01] [IntentAgent] Extracted Location: G-13
+[2026-05-17T03:45:01] [IntentAgent] Extracted Time: Tomorrow morning ("kal subah" -> "morning")
+[2026-05-17T03:45:02] [DiscoveryAgent] Reading provider data from data/providers_mock_db.json
+[2026-05-17T03:45:02] [DiscoveryAgent] Filtering providers by service: ac_technician. Matches: p1, p2, p3
+[2026-05-17T03:45:02] [DiscoveryAgent] Filtering providers by location: G-13. Matches: p1, p3
+[2026-05-17T03:45:03] [RankingAgent] Evaluating available providers for time: morning
+[2026-05-17T03:45:03] [RankingAgent] Checking provider p1 (Ali AC Services). Availability: morning, afternoon. Match: Yes
+[2026-05-17T03:45:03] [RankingAgent] Checking provider p3 (G-13 AC Experts). Availability: evening. Match: No
+[2026-05-17T03:45:03] [RankingAgent] Selected top provider: p1 (Ali AC Services) with rating 4.8
+[2026-05-17T03:45:04] [BookingAgent] Initiating booking for provider p1 (Ali AC Services)
+[2026-05-17T03:45:04] [BookingAgent] Booking parameters: Location: G-13, Time: Tomorrow morning
+[2026-05-17T03:45:04] [BookingAgent] Generated Booking ID: BK-90952
+[2026-05-17T03:45:04] [BookingAgent] Writing result to data/bookings.json
+[2026-05-17T03:45:05] [BookingAgent] Generating data/booking_receipt.txt
+[2026-05-17T03:45:05] [System] Workflow completed successfully.
+
+[2026-05-17T23:15:00] [System] Processing Service Request: "I need a plumber tomorrow afternoon in F-7"
+[2026-05-17T23:15:01] [IntentAgent] Parsing query...
+[2026-05-17T23:15:01] [IntentAgent] Identified Language: English
+[2026-05-17T23:15:01] [IntentAgent] Extracted Intent: Plumber (Matches keywords in data/intent_keywords.json)
+[2026-05-17T23:15:01] [IntentAgent] Extracted Location: F-7
+[2026-05-17T23:15:01] [IntentAgent] Extracted Time: Tomorrow afternoon
+[2026-05-17T23:15:02] [DiscoveryAgent] Reading provider data from data/providers_mock_db.json
+[2026-05-17T23:15:02] [DiscoveryAgent] Filtering providers by service: plumber. Matches: p4
+[2026-05-17T23:15:02] [DiscoveryAgent] Filtering providers by location: F-7. Matches: None
+[2026-05-17T23:15:03] [RankingAgent] Evaluating available providers for time: afternoon
+[2026-05-17T23:15:03] [RankingAgent] No providers available to rank.
+[2026-05-17T23:15:04] [BookingAgent] Booking failed. No provider available for Plumber in F-7.
+[2026-05-17T23:15:05] [System] Workflow completed with failure: No provider found.
+
+[2026-05-17T23:35:00] [System] Processing Service Request: "مجھے آج شام G-9 میں الیکٹریشن چاہیے"
+[2026-05-17T23:35:01] [IntentAgent] Parsing query...
+[2026-05-17T23:35:01] [IntentAgent] Identified Language: Urdu
+[2026-05-17T23:35:01] [IntentAgent] Extracted Intent: Electrician (Matches keywords in data/intent_keywords.json)
+[2026-05-17T23:35:01] [IntentAgent] Extracted Location: G-9
+[2026-05-17T23:35:01] [IntentAgent] Extracted Time: Today evening ("آج شام" -> "evening")
+[2026-05-17T23:35:02] [DiscoveryAgent] Reading provider data from data/providers_mock_db.json
+[2026-05-17T23:35:02] [DiscoveryAgent] Filtering providers by service: electrician. Matches: None
+[2026-05-17T23:35:03] [RankingAgent] Evaluating available providers for time: evening
+[2026-05-17T23:35:03] [RankingAgent] No providers available to rank.
+[2026-05-17T23:35:04] [BookingAgent] Booking failed. No provider available for Electrician in G-9.
+[2026-05-17T23:35:05] [System] Workflow completed with failure: No provider found.
+
+[2026-05-17T23:45:00] [System] Re-running Service Request: "I need a plumber tomorrow afternoon in F-7"
+[2026-05-17T23:45:01] [IntentAgent] Parsing query...
+[2026-05-17T23:45:01] [IntentAgent] Identified Language: English
+[2026-05-17T23:45:01] [IntentAgent] Extracted Intent: Plumber
+[2026-05-17T23:45:01] [IntentAgent] Extracted Location: F-7
+[2026-05-17T23:45:01] [IntentAgent] Extracted Time: Tomorrow afternoon
+[2026-05-17T23:45:02] [DiscoveryAgent] Reading provider data from data/providers_mock_db.json
+[2026-05-17T23:45:02] [DiscoveryAgent] Filtering providers by service: plumber. Matches: p4, PRV015
+[2026-05-17T23:45:02] [DiscoveryAgent] Filtering providers by location: F-7. Matches: PRV015
+[2026-05-17T23:45:03] [RankingAgent] Evaluating available providers for time: afternoon
+[2026-05-17T23:45:03] [RankingAgent] Checking provider PRV015 (Raza Plumbing F-7). Availability: morning, afternoon. Match: Yes
+[2026-05-17T23:45:03] [RankingAgent] Selected top provider: PRV015 (Raza Plumbing F-7) with rating 4.5
+[2026-05-17T23:45:04] [BookingAgent] Initiating booking for provider PRV015 (Raza Plumbing F-7)
+[2026-05-17T23:45:04] [BookingAgent] Booking parameters: Location: F-7, Time: Tomorrow afternoon
+[2026-05-17T23:45:04] [BookingAgent] Generated Booking ID: BK-90953
+[2026-05-17T23:45:04] [BookingAgent] Writing result to data/bookings.json
+[2026-05-17T23:45:05] [BookingAgent] Generating data/booking_receipt.txt
+[2026-05-17T23:45:05] [System] Workflow completed successfully.
+
+[2026-05-17T23:45:10] [System] Re-running Service Request: "مجھے آج شام G-9 میں الیکٹریشن چاہیے"
+[2026-05-17T23:45:11] [IntentAgent] Parsing query...
+[2026-05-17T23:45:11] [IntentAgent] Identified Language: Urdu
+[2026-05-17T23:45:11] [IntentAgent] Extracted Intent: Electrician
+[2026-05-17T23:45:11] [IntentAgent] Extracted Location: G-9
+[2026-05-17T23:45:11] [IntentAgent] Extracted Time: Today evening ("آج شام" -> "evening")
+[2026-05-17T23:45:12] [DiscoveryAgent] Reading provider data from data/providers_mock_db.json
+[2026-05-17T23:45:12] [DiscoveryAgent] Filtering providers by service: electrician. Matches: PRV016
+[2026-05-17T23:45:12] [DiscoveryAgent] Filtering providers by location: G-9. Matches: PRV016
+[2026-05-17T23:45:13] [RankingAgent] Evaluating available providers for time: evening
+[2026-05-17T23:45:13] [RankingAgent] Checking provider PRV016 (Kareem Electric G-9). Availability: 08:00, 09:00, 10:00, 14:00, 15:00. Match: No (Does not match evening)
+[2026-05-17T23:45:13] [RankingAgent] No providers available to rank after time filter.
+[2026-05-17T23:45:14] [BookingAgent] Booking failed. No provider available for Electrician in G-9 at the requested time.
+[2026-05-17T23:45:15] [System] Workflow completed with failure: No provider found for the requested time.

@@ -1,0 +1,5 @@
+{
+  "ac_technician": ["ac technician", "ac repair", "ac mechanic", "air conditioner"],
+  "plumber": ["plumber", "pipe", "leak", "water"],
+  "electrician": ["electrician", "wiring", "fan repair"]
+}

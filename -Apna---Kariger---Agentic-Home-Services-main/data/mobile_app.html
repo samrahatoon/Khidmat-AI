@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Apna Kariger</title>
+<style>
+  :root {
+    --primary: #22c55e;
+    --primary-dark: #16a34a;
+    --primary-light: #dcfce7;
+    --bg-color: #f3f4f6;
+    --text-dark: #1f2937;
+    --text-gray: #6b7280;
+    --white: #ffffff;
+    --yellow-light: #fef3c7;
+    --border: #e5e7eb;
+  }
+  
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: #e5e7eb;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  
+  .app-container {
+    width: 375px;
+    height: 812px; /* iOS standard height */
+    max-height: 100vh;
+    background-color: var(--bg-color);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+  }
+  
+  /* Screens */
+  .screen {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-color: var(--bg-color);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.4s ease-in-out;
+    transform: translateX(100%);
+    padding-bottom: 60px; /* space for nav dots */
+    overflow-y: auto;
+  }
+  .screen.active { transform: translateX(0); }
+  .screen.prev { transform: translateX(-100%); }
+  
+  /* Header */
+  .header {
+    background: var(--white);
+    padding: 20px 16px 15px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .app-title {
+    font-size: 1.25rem; font-weight: bold; color: var(--primary);
+    display: flex; justify-content: center; align-items: center; gap: 8px;
+  }
+  .tagline { font-size: 0.8rem; color: var(--text-gray); margin-top: 4px; }
+  
+  /* Screen 1 */
+  .chat-container { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 12px; }
+  .chat-bubble {
+    background: var(--white); border-radius: 16px; padding: 12px 16px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05); align-self: flex-start; max-width: 90%;
+    border-bottom-left-radius: 4px;
+  }
+  .chat-bubble.agent { background: var(--primary-light); color: var(--text-dark); }
+  .chat-bubble.user { background: var(--primary); color: var(--white); align-self: flex-end; border-bottom-left-radius: 16px; border-bottom-right-radius: 4px;}
+  .chat-bubble p { font-size: 0.9rem; margin-bottom: 8px; line-height: 1.4; }
+  .chat-bubble p:last-child { margin-bottom: 0; }
+  .chat-bubble p[dir="rtl"] { font-family: "Jameel Noori Nastaleeq", "Urdu Typesetting", Arial, sans-serif; font-size: 1.1rem; }
+  
+  .services-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 16px; background: var(--white); margin: 16px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+  .service-item { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-dark); cursor: pointer; }
+  .service-icon { width: 44px; height: 44px; border-radius: 50%; background: var(--primary-light); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--primary-dark); }
+  
+  .input-area {
+    position: absolute; bottom: 60px; left: 0; width: 100%;
+    background: var(--white); padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px; border-top: 1px solid var(--border);
+  }
+  .input-bar { flex: 1; background: var(--bg-color); border: 1px solid var(--border); border-radius: 20px; padding: 10px 16px; font-size: 0.9rem; outline: none; }
+  .icon-btn { background: none; border: none; font-size: 1.2rem; color: var(--primary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .send-btn { background: var(--primary); color: var(--white); width: 40px; height: 40px; border-radius: 50%; border: none; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(34,197,94,0.3);}
+  
+  /* Screen 2 */
+  .thinking-container { padding: 30px 20px; display: flex; flex-direction: column; flex: 1; }
+  .thinking-header { font-size: 1.2rem; font-weight: bold; color: var(--text-dark); margin-bottom: 24px; text-align: center;}
+  
+  .step-item { display: flex; gap: 12px; margin-bottom: 20px; opacity: 0; transform: translateY(10px); animation: fadeInUp 0.5s forwards; }
+  .step-icon { width: 24px; height: 24px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; }
+  .step-content { font-size: 0.9rem; color: var(--text-dark); line-height: 1.4; background: var(--white); padding: 12px; border-radius: 8px; flex: 1; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border-left: 3px solid var(--primary); }
+  
+  @keyframes fadeInUp { to { opacity: 1; transform: translateY(0); } }
+  .step-item:nth-child(1) { animation-delay: 0.5s; }
+  .step-item:nth-child(2) { animation-delay: 1.5s; }
+  .step-item:nth-child(3) { animation-delay: 2.5s; }
+  .step-item:nth-child(4) { animation-delay: 4.0s; }
+  
+  .progress-container { width: 100%; height: 6px; background: var(--border); border-radius: 3px; margin-top: auto; overflow: hidden; }
+  .progress-bar { width: 0%; height: 100%; background: var(--primary); animation: progressAnim 5s ease-in-out forwards; }
+  @keyframes progressAnim {
+    0% { width: 0%; } 20% { width: 25%; } 50% { width: 50%; } 80% { width: 75%; } 100% { width: 100%; }
+  }
+
+  /* Screen 3 */
+  .match-banner { background: var(--primary); color: var(--white); text-align: center; padding: 12px; font-weight: bold; font-size: 1rem; }
+  .card-container { padding: 16px; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+  .provider-card { background: var(--white); border-radius: 16px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+  .provider-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .provider-name { font-size: 1.2rem; font-weight: bold; color: var(--text-dark); }
+  .verified-badge { background: var(--primary-light); color: var(--primary-dark); font-size: 0.7rem; font-weight: bold; padding: 4px 8px; border-radius: 12px; display: inline-flex; align-items: center; gap: 4px;}
+  .provider-rating { color: #f59e0b; font-size: 0.9rem; margin-bottom: 12px; display: flex; align-items: center; gap: 4px;}
+  .provider-rating span { color: var(--text-gray); font-size: 0.8rem; }
+  .provider-details { display: grid; grid-template-columns: 1fr; gap: 8px; font-size: 0.9rem; color: var(--text-dark); margin-bottom: 16px; }
+  .detail-row { display: flex; align-items: center; gap: 8px; }
+  .detail-icon { color: var(--primary); width: 16px; text-align: center; }
+  
+  .reasoning-box { background: var(--yellow-light); border: 1px solid #fde68a; border-radius: 8px; padding: 12px; font-size: 0.85rem; color: #92400e; margin-bottom: 20px; line-height: 1.5; }
+  .reasoning-box strong { display: block; margin-bottom: 4px; color: #b45309;}
+  
+  .btn { width: 100%; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: bold; cursor: pointer; text-align: center; border: none; margin-bottom: 10px; transition: opacity 0.2s; }
+  .btn:active { opacity: 0.8; }
+  .btn-primary { background: var(--primary); color: var(--white); box-shadow: 0 4px 10px rgba(34,197,94,0.3); }
+  .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+  
+  /* Screen 4 */
+  .success-header { text-align: center; padding: 30px 20px 10px; }
+  .success-icon { width: 80px; height: 80px; background: var(--primary); color: var(--white); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-bottom: 16px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform: scale(0); }
+  @keyframes popIn { to { transform: scale(1); } }
+  .success-title { font-size: 1.5rem; font-weight: bold; color: var(--text-dark); margin-bottom: 20px; }
+  
+  .receipt-card { background: var(--white); border-radius: 12px; padding: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 16px; overflow: hidden; border: 1px solid var(--border); }
+  .receipt-header { background: var(--bg-color); padding: 12px 16px; border-bottom: 1px dashed #cbd5e1; display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: bold; color: var(--text-gray); }
+  .receipt-body { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .receipt-row { display: flex; flex-direction: column; gap: 4px; }
+  .receipt-label { font-size: 0.75rem; color: var(--text-gray); text-transform: uppercase; letter-spacing: 0.5px; }
+  .receipt-value { font-size: 0.95rem; font-weight: 500; color: var(--text-dark); }
+  .receipt-status { display: inline-block; background: var(--primary-light); color: var(--primary-dark); padding: 4px 12px; border-radius: 4px; font-weight: bold; font-size: 0.8rem; letter-spacing: 1px; margin-top: 8px;}
+  
+  .reminder-notice { background: #e0f2fe; color: #0369a1; padding: 12px; border-radius: 8px; font-size: 0.85rem; text-align: center; margin-bottom: 24px; display: flex; align-items: center; justify-content: center; gap: 8px;}
+  
+  /* Navigation */
+  .nav-dots { position: absolute; bottom: 20px; left: 0; width: 100%; display: flex; justify-content: center; gap: 8px; z-index: 20; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #d1d5db; cursor: pointer; transition: background 0.3s, transform 0.3s; }
+  .dot.active { background: var(--primary); transform: scale(1.2); }
+  
+  .nav-buttons { position: absolute; bottom: 0; width: 100%; display: flex; justify-content: space-between; padding: 15px 20px; z-index: 20; pointer-events: none;}
+  .nav-arrow { pointer-events: auto; background: var(--white); width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); color: var(--text-gray); cursor: pointer; border: none; font-size: 1.2rem;}
+  .nav-arrow:disabled { opacity: 0.3; cursor: not-allowed; }
+
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  
+  <!-- Screen 1: Home -->
+  <div class="screen active" id="screen-0">
+    <div class="header">
+      <div class="app-title">🤖 Apna Kariger</div>
+      <div class="tagline">Aap ki mushkil hoi aasaan</div>
+    </div>
+    
+    <div class="chat-container">
+      <div class="chat-bubble agent">
+        <p>Hi! I'm your AI assistant. Tell me what you need, in any language.</p>
+        <p style="font-size: 0.8rem; margin-top: 8px; color: var(--text-gray);">Try examples like:</p>
+        <p>• "Mujhe kal subah G-13 mein AC technician chahiye"</p>
+        <p>• "I need a plumber tomorrow in F-7"</p>
+        <p dir="rtl">• "مجھے آج شام G-9 میں الیکٹریشن چاہیے"</p>
+      </div>
+    </div>
+    
+    <div class="services-grid">
+      <div class="service-item"><div class="service-icon">❄️</div>AC Repair</div>
+      <div class="service-item"><div class="service-icon">🔧</div>Plumber</div>
+      <div class="service-item"><div class="service-icon">⚡</div>Electrician</div>
+      <div class="service-item"><div class="service-icon">🧹</div>Cleaning</div>
+    </div>
+    
+    <div class="input-area">
+      <button class="icon-btn">🎤</button>
+      <input type="text" class="input-bar" placeholder="Type your request here..." value="Mujhe kal subah G-13 mein AC technician chahiye" readonly>
+      <button class="send-btn" onclick="goToScreen(1)">➤</button>
+    </div>
+  </div>
+
+  <!-- Screen 2: Agent Thinking -->
+  <div class="screen" id="screen-1">
+    <div class="header">
+      <div class="app-title">🤖 Apna Kariger</div>
+    </div>
+    
+    <div class="thinking-container">
+      <div class="thinking-header">Searching for you...</div>
+      
+      <div class="steps-list">
+        <div class="step-item">
+          <div class="step-icon">✓</div>
+          <div class="step-content">Language detected: Roman Urdu ✓</div>
+        </div>
+        <div class="step-item">
+          <div class="step-icon">✓</div>
+          <div class="step-content">Service: AC Technician | Location: G-13 | Time: Tomorrow 9AM ✓</div>
+        </div>
+        <div class="step-item">
+          <div class="step-icon">✓</div>
+          <div class="step-content">Found 3 providers nearby — ranking by distance & rating...</div>
+        </div>
+        <div class="step-item">
+          <div class="step-icon">✓</div>
+          <div class="step-content">Best match found: Ali AC Services (4.8★, 2.1km away) ✓</div>
+        </div>
+      </div>
+      
+      <div class="progress-container">
+        <div class="progress-bar"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 3: Match Card -->
+  <div class="screen" id="screen-2">
+    <div class="header">
+      <div class="app-title">🤖 Apna Kariger</div>
+    </div>
+    <div class="match-banner">Match Found!</div>
+    
+    <div class="card-container">
+      <div class="provider-card">
+        <div class="provider-header">
+          <div class="provider-name">Ali AC Services</div>
+          <div class="verified-badge">✓ Verified Provider</div>
+        </div>
+        
+        <div class="provider-rating">★★★★★ <span>4.8 (142 reviews)</span></div>
+        
+        <div class="provider-details">
+          <div class="detail-row"><span class="detail-icon">📍</span> 2.1 km away • G-13, Islamabad</div>
+          <div class="detail-row"><span class="detail-icon">💰</span> PKR 800–3,000</div>
+        </div>
+        
+        <div class="reasoning-box">
+          <strong>Selected because:</strong> Closest available provider with highest rating.<br>
+          Slot confirmed: Tomorrow 10:00 AM
+        </div>
+        
+        <button class="btn btn-primary" onclick="goToScreen(3)">Confirm Booking</button>
+        <button class="btn btn-outline">See Other Options</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 4: Confirmation -->
+  <div class="screen" id="screen-3">
+    <div class="success-header">
+      <div class="success-icon">✓</div>
+      <div class="success-title">Booking Confirmed!</div>
+    </div>
+    
+    <div class="card-container" style="padding-top: 0;">
+      <div class="receipt-card">
+        <div class="receipt-header">
+          <span>RECEIPT</span>
+          <span>#BK-90952</span>
+        </div>
+        <div class="receipt-body">
+          <div class="receipt-row">
+            <span class="receipt-label">Service</span>
+            <span class="receipt-value">AC Technician</span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">Provider</span>
+            <span class="receipt-value">Ali AC Services | +92-300-1234567</span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">Location</span>
+            <span class="receipt-value">G-13, Islamabad</span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">Date & Time</span>
+            <span class="receipt-value">Tomorrow, 10:00 AM</span>
+          </div>
+          <div class="receipt-row">
+            <span class="receipt-label">Price Estimate</span>
+            <span class="receipt-value">PKR 800–3,000</span>
+          </div>
+          <div style="text-align: center;">
+            <span class="receipt-status">CONFIRMED</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="reminder-notice">
+        You will be reminded 1 hour before — 9:00 AM
+      </div>
+      
+      <button class="btn btn-outline" style="margin-bottom: 12px;">Share</button>
+      <button class="btn btn-primary" onclick="goToScreen(0)">Book Another Service</button>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav-dots">
+    <div class="dot active" onclick="goToScreen(0)"></div>
+    <div class="dot" onclick="goToScreen(1)"></div>
+    <div class="dot" onclick="goToScreen(2)"></div>
+    <div class="dot" onclick="goToScreen(3)"></div>
+  </div>
+  
+  <div class="nav-buttons">
+    <button class="nav-arrow" id="prev-btn" onclick="nextScreen(-1)">❮</button>
+    <button class="nav-arrow" id="next-btn" onclick="nextScreen(1)">❯</button>
+  </div>
+
+</div>
+
+<script>
+  let currentScreen = 0;
+  const screens = document.querySelectorAll('.screen');
+  const dots = document.querySelectorAll('.dot');
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  
+  function updateNav() {
+    prevBtn.disabled = currentScreen === 0;
+    nextBtn.disabled = currentScreen === screens.length - 1;
+    
+    dots.forEach((dot, index) => {
+      dot.classList.toggle('active', index === currentScreen);
+    });
+  }
+  
+  function goToScreen(index) {
+    if(index < 0 || index >= screens.length) return;
+    
+    screens.forEach((screen, i) => {
+      screen.classList.remove('active', 'prev');
+      if (i < index) {
+        screen.classList.add('prev');
+        screen.style.transform = 'translateX(-100%)';
+      } else if (i === index) {
+        screen.classList.add('active');
+        screen.style.transform = 'translateX(0)';
+      } else {
+        screen.style.transform = 'translateX(100%)';
+      }
+    });
+    
+    currentScreen = index;
+    updateNav();
+    
+    // Reset animations on screen 1 (Thinking screen) when visited
+    if(index === 1) {
+      const stepItems = document.querySelectorAll('.step-item');
+      const progressBar = document.querySelector('.progress-bar');
+      
+      stepItems.forEach(item => {
+        item.style.animation = 'none';
+        item.offsetHeight; /* trigger reflow */
+        item.style.animation = null; 
+      });
+      
+      progressBar.style.animation = 'none';
+      progressBar.offsetHeight;
+      progressBar.style.animation = null;
+    }
+  }
+  
+  function nextScreen(dir) {
+    goToScreen(currentScreen + dir);
+  }
+  
+  updateNav();
+</script>
+</body>
+</html>

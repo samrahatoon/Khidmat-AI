@@ -1,0 +1,9 @@
+agents:
+  - name: IntentAgent
+    description: "Extracts intent, location, and time from user query."
+  - name: DiscoveryAgent
+    description: "Finds providers matching the intent and location."
+  - name: RankingAgent
+    description: "Ranks providers by rating and availability."
+  - name: BookingAgent
+    description: "Books the top-ranked provider."

@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KhidmatAI React Prototype</title>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body, html { 
+      margin: 0; 
+      padding: 0; 
+      width: 100%; 
+      height: 100%; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    }
+    /* Hide scrollbar for a more app-like feel in containers */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    const COLORS = {
+      green: "#16a34a", greenLight: "#dcfce7", greenDark: "#14532d",
+      amber: "#d97706", amberLight: "#fef3c7",
+      blue: "#1d4ed8", blueLight: "#dbeafe",
+      red: "#dc2626", redLight: "#fee2e2",
+      gray: "#374151", grayLight: "#f9fafb", grayBorder: "#e5e7eb",
+      white: "#ffffff", dark: "#111827"
+    };
+
+    const PROVIDERS = [
+      { id:"PRV001", name:"Ali AC Services", category:"ac_technician", sector:"G-13", rating:4.8, reviews:142, experience:8, price:[800,3000], verified:true, distance:2.1, phone:"+92-300-1234567", slots:["09:00","10:00","14:00","15:00"] },
+      { id:"PRV002", name:"CoolBreeze Technicians", category:"ac_technician", sector:"G-11", rating:4.5, reviews:89, experience:5, price:[700,2500], verified:true, distance:3.4, phone:"+92-321-9876543", slots:["08:00","09:00","13:00","14:00"] },
+      { id:"PRV004", name:"Hassan Plumbing Works", category:"plumber", sector:"G-13", rating:4.7, reviews:203, experience:12, price:[500,2000], verified:true, distance:2.3, phone:"+92-300-7654321", slots:["08:00","09:00","10:00","14:00","15:00"] },
+      { id:"PRV015", name:"Raza Plumbing F-7", category:"plumber", sector:"F-7", rating:4.5, reviews:67, experience:7, price:[500,1800], verified:true, distance:1.8, phone:"+92-300-1112223", slots:["09:00","10:00","13:00","14:00","15:00"] },
+      { id:"PRV006", name:"Usman Electric Co.", category:"electrician", sector:"G-13", rating:4.9, reviews:311, experience:15, price:[600,3500], verified:true, distance:2.0, phone:"+92-345-1122334", slots:["08:00","09:00","10:00","14:00","15:00","16:00"] },
+      { id:"PRV016", name:"Kareem Electric G-9", category:"electrician", sector:"G-9", rating:4.6, reviews:83, experience:9, price:[600,2800], verified:true, distance:1.5, phone:"+92-321-4445556", slots:["08:00","09:00","10:00","14:00","15:00","17:00","18:00"] },
+      { id:"PRV008", name:"Sparkle Cleaning Services", category:"cleaning", sector:"G-13", rating:4.6, reviews:187, experience:4, price:[1500,5000], verified:true, distance:2.2, phone:"+92-322-4455667", slots:["08:00","09:00","10:00","13:00","14:00"] },
+      { id:"PRV010", name:"Master Wood Carpentry", category:"carpenter", sector:"G-11", rating:4.7, reviews:129, experience:18, price:[1000,8000], verified:true, distance:3.1, phone:"+92-300-3344556", slots:["09:00","10:00","14:00","15:00"] },
+      { id:"PRV012", name:"Prof. Tariq Home Tutor", category:"tutor", sector:"G-13", rating:4.9, reviews:88, experience:10, price:[800,2000], verified:true, distance:1.9, phone:"+92-321-1122334", slots:["14:00","15:00","16:00","17:00","18:00"] },
+      { id:"PRV013", name:"Glamour Beauty at Home", category:"beautician", sector:"F-7", rating:4.8, reviews:234, experience:6, price:[500,5000], verified:true, distance:4.2, phone:"+92-300-5566778", slots:["10:00","11:00","14:00","15:00","16:00"] },
+    ];
+
+    const SERVICES = [
+      { id:"ac_technician", label:"AC Repair", emoji:"❄️", keywords:["ac","air condition","ائر کنڈیشن","اے سی","kal subah","ac technician","thanda","cooling"] },
+      { id:"plumber", label:"Plumber", emoji:"🔧", keywords:["plumb","pipe","nal","pani","leakage","نل","پائپ"] },
+      { id:"electrician", label:"Electrician", emoji:"⚡", keywords:["electr","bijli","wiring","بجلی","light","fan","switch"] },
+      { id:"cleaning", label:"Cleaning", emoji:"🧹", keywords:["clean","safai","saaf","صفائی","maid","jharoo"] },
+      { id:"carpenter", label:"Carpenter", emoji:"🪵", keywords:["carpen","barhai","furniture","darwaza","لکڑی"] },
+      { id:"painter", label:"Painter", emoji:"🎨", keywords:["paint","rang","safedi","رنگ"] },
+      { id:"tutor", label:"Tutor", emoji:"📚", keywords:["tutor","teacher","parhana","tuition","استاد"] },
+      { id:"beautician", label:"Beautician", emoji:"💇", keywords:["beauty","salon","makeup","baal","mehndi","بال"] },
+    ];
+
+    const TIME_PHRASES = [
+      { keys:["abhi","now","ابھی","jaldi","urgent"], label:"Today, ASAP", slot:"09:00" },
+      { keys:["kal subah","tomorrow morning","kal morning","کل صبح"], label:"Tomorrow, 09:00 AM", slot:"09:00" },
+      { keys:["kal shaam","tomorrow evening","کل شام"], label:"Tomorrow, 06:00 PM", slot:"18:00" },
+      { keys:["kal dopahar","tomorrow afternoon","کل دوپہر"], label:"Tomorrow, 02:00 PM", slot:"14:00" },
+      { keys:["aaj shaam","today evening","آج شام","shaam"], label:"Today, 06:00 PM", slot:"17:00" },
+      { keys:["aaj","today","آج"], label:"Today, 10:00 AM", slot:"10:00" },
+      { keys:["kal","tomorrow","کل"], label:"Tomorrow, 10:00 AM", slot:"10:00" },
+    ];
+
+    const LOC_SECTORS = ["G-13","G-11","G-9","G-10","F-7","F-11","H-13","I-8","E-11","G-8","F-6","F-8"];
+
+    function parseInput(text) {
+      const lower = text.toLowerCase();
+      const isUrdu = /[\u0600-\u06FF]/.test(text);
+      const romanUrduWords = ["mujhe","chahiye","kal","subah","ghar","aaj","abhi","mein","bhai","baji","karwana","nahi","theek","kharab"];
+      const isRoman = romanUrduWords.some(w => lower.includes(w));
+      const lang = isUrdu ? "Urdu" : isRoman ? "Roman Urdu" : "English";
+
+      let service = null;
+      for (const s of SERVICES) {
+        if (s.keywords.some(k => lower.includes(k.toLowerCase()))) { service = s; break; }
+      }
+
+      let location = null;
+      for (const sec of LOC_SECTORS) {
+        if (text.toUpperCase().includes(sec)) { location = sec; break; }
+      }
+
+      let timeLabel = null, timeSlot = null;
+      for (const t of TIME_PHRASES) {
+        if (t.keys.some(k => lower.includes(k))) { timeLabel = t.label; timeSlot = t.slot; break; }
+      }
+
+      const confidence = ((service ? 1 : 0) + (location ? 1 : 0) + (timeLabel ? 1 : 0)) / 3;
+      return { lang, service, location, timeLabel, timeSlot, confidence, raw: text };
+    }
+
+    function findProviders(intent) {
+      if (!intent.service) return [];
+      let matches = PROVIDERS.filter(p => p.category === intent.service.id);
+      if (intent.location) {
+        const sectorMatches = matches.filter(p => p.sector === intent.location);
+        if (sectorMatches.length > 0) matches = sectorMatches;
+      }
+      if (intent.timeSlot) {
+        matches = matches.filter(p => p.slots.some(s => s >= intent.timeSlot && s <= String(parseInt(intent.timeSlot)+2).padStart(2,"0")+":00"));
+        if (matches.length === 0) matches = PROVIDERS.filter(p => p.category === intent.service.id);
+      }
+      return matches.sort((a,b) => {
+        const scoreA = (a.rating/5*0.4) + ((1/a.distance)*0.4) + (a.verified?0.2:0);
+        const scoreB = (b.rating/5*0.4) + ((1/b.distance)*0.4) + (b.verified?0.2:0);
+        return scoreB - scoreA;
+      }).slice(0,3);
+    }
+
+    function genBookingId() {
+      const d = new Date();
+      return `BK-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,"0")}${String(d.getDate()).padStart(2,"0")}-${Math.floor(Math.random()*90000+10000)}`;
+    }
+
+    // ─── SCREENS ──────────────────────────────────────────────────
+
+    function HomeScreen({ onSend, onQuickService }) {
+      const [input, setInput] = useState("");
+      const examples = [
+        "Mujhe kal subah G-13 mein AC technician chahiye",
+        "I need a plumber tomorrow afternoon in F-7",
+        "مجھے آج شام G-9 میں الیکٹریشن چاہیے",
+      ];
+      return (
+        <div style={{ display:"flex", flexDirection:"column", height:"100%", background:`linear-gradient(160deg, #f0fdf4 0%, #fff 60%)` }}>
+          {/* Header */}
+          <div style={{ padding:"24px 20px 16px", borderBottom:`1px solid ${COLORS.grayBorder}` }}>
+            <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+              <div style={{ width:40, height:40, borderRadius:12, background:COLORS.green, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20 }}>🤖</div>
+              <div>
+                <div style={{ fontSize:20, fontWeight:700, color:COLORS.dark, fontFamily:"Georgia, serif" }}>KhidmatAI</div>
+                <div style={{ fontSize:12, color:COLORS.green, fontWeight:500 }}>Powered by Google Antigravity · Gemini</div>
+              </div>
+            </div>
+            <div style={{ marginTop:12, fontSize:15, color:COLORS.gray, fontWeight:500 }}>Assalam o Alaikum! 👋 Kya chahiye aaj?</div>
+          </div>
+
+          {/* Service grid */}
+          <div style={{ padding:"16px 20px 0" }}>
+            <div style={{ fontSize:12, fontWeight:600, color:"#9ca3af", textTransform:"uppercase", letterSpacing:"0.05em", marginBottom:10 }}>Services</div>
+            <div style={{ display:"grid", gridTemplateColumns:"repeat(4,1fr)", gap:8 }}>
+              {SERVICES.map(s => (
+                <button key={s.id} onClick={() => onQuickService(s)} style={{
+                  background:COLORS.white, border:`1px solid ${COLORS.grayBorder}`, borderRadius:12,
+                  padding:"10px 4px", cursor:"pointer", display:"flex", flexDirection:"column", alignItems:"center", gap:4,
+                  transition:"all 0.15s"
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = COLORS.green; e.currentTarget.style.background = COLORS.greenLight; }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = COLORS.grayBorder; e.currentTarget.style.background = COLORS.white; }}>
+                  <span style={{ fontSize:22 }}>{s.emoji}</span>
+                  <span style={{ fontSize:10, fontWeight:600, color:COLORS.gray }}>{s.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Examples */}
+          <div style={{ padding:"16px 20px 0" }}>
+            <div style={{ fontSize:12, fontWeight:600, color:"#9ca3af", textTransform:"uppercase", letterSpacing:"0.05em", marginBottom:8 }}>Try saying</div>
+            <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+              {examples.map((ex,i) => (
+                <button key={i} onClick={() => { setInput(ex); }} style={{
+                  background:COLORS.white, border:`1px solid ${COLORS.grayBorder}`, borderRadius:10,
+                  padding:"8px 12px", textAlign:"left", cursor:"pointer", fontSize:13, color:COLORS.gray,
+                  display:"flex", alignItems:"center", gap:8
+                }}>
+                  <span style={{ color:COLORS.green, fontSize:16 }}>💬</span> {ex}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Input */}
+          <div style={{ marginTop:"auto", padding:"16px 20px 24px", borderTop:`1px solid ${COLORS.grayBorder}`, background:COLORS.white }}>
+            <div style={{ display:"flex", gap:8 }}>
+              <input
+                value={input}
+                onChange={e => setInput(e.target.value)}
+                onKeyDown={e => e.key === "Enter" && input.trim() && onSend(input)}
+                placeholder="Apni zarurat likho... (Urdu, Roman Urdu, English)"
+                style={{
+                  flex:1, padding:"12px 14px", borderRadius:12, border:`1.5px solid ${COLORS.grayBorder}`,
+                  fontSize:13, outline:"none", fontFamily:"inherit",
+                  transition:"border-color 0.15s"
+                }}
+                onFocus={e => e.target.style.borderColor = COLORS.green}
+                onBlur={e => e.target.style.borderColor = COLORS.grayBorder}
+              />
+              <button onClick={() => input.trim() && onSend(input)} style={{
+                background:COLORS.green, color:"#fff", border:"none", borderRadius:12,
+                padding:"12px 16px", cursor:"pointer", fontSize:18, fontWeight:700
+              }}>→</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function ThinkingScreen({ intent, providers, onDone }) {
+      const [step, setStep] = useState(0);
+      const steps = [
+        { icon:"🌐", label:`Language detected`, value:intent.lang },
+        { icon:"🔍", label:`Extracted`, value:`${intent.service?.label || "?"} · ${intent.location || "?"} · ${intent.timeLabel || "?"}` },
+        { icon:"📍", label:`Scanning ${PROVIDERS.filter(p=>p.category===intent.service?.id).length} providers`, value:`${providers.length} match found` },
+        { icon:"🏆", label:`Best match`, value:providers[0]?.name + ` (${providers[0]?.rating}★)` },
+      ];
+      useEffect(() => {
+        if (step < steps.length) {
+          const t = setTimeout(() => setStep(s => s+1), 900);
+          return () => clearTimeout(t);
+        } else {
+          const t = setTimeout(onDone, 600);
+          return () => clearTimeout(t);
+        }
+      }, [step]);
+
+      const pct = Math.round((step / steps.length) * 100);
+      return (
+        <div style={{ display:"flex", flexDirection:"column", height:"100%", background:"#fff" }}>
+          <div style={{ padding:"24px 20px 16px", borderBottom:`1px solid ${COLORS.grayBorder}` }}>
+            <div style={{ fontSize:18, fontWeight:700, color:COLORS.dark }}>🤖 AI Agent Processing...</div>
+            <div style={{ fontSize:12, color:"#9ca3af", marginTop:4 }}>Antigravity orchestrating 4 agents</div>
+          </div>
+          <div style={{ padding:"16px 20px" }}>
+            <div style={{ background:COLORS.grayLight, borderRadius:12, padding:"12px 14px", fontSize:13, color:COLORS.gray, borderLeft:`3px solid ${COLORS.green}`, marginBottom:20 }}>
+              "{intent.raw}"
+            </div>
+            <div style={{ height:6, background:COLORS.grayBorder, borderRadius:3, marginBottom:20, overflow:"hidden" }}>
+              <div style={{ height:"100%", width:`${pct}%`, background:COLORS.green, borderRadius:3, transition:"width 0.8s ease" }} />
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+              {steps.map((s,i) => (
+                <div key={i} style={{
+                  display:"flex", alignItems:"flex-start", gap:12, padding:"12px 14px",
+                  borderRadius:12, border:`1px solid`,
+                  borderColor: i < step ? COLORS.green : COLORS.grayBorder,
+                  background: i < step ? COLORS.greenLight : COLORS.grayLight,
+                  opacity: i <= step ? 1 : 0.4,
+                  transition:"all 0.4s ease"
+                }}>
+                  <span style={{ fontSize:20 }}>{i < step ? "✅" : s.icon}</span>
+                  <div>
+                    <div style={{ fontSize:13, fontWeight:600, color: i < step ? COLORS.greenDark : COLORS.gray }}>{s.label}</div>
+                    {i < step && <div style={{ fontSize:12, color:COLORS.green, marginTop:2, fontWeight:500 }}>{s.value}</div>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function ProviderScreen({ providers, intent, onConfirm, onBack }) {
+      const [selected, setSelected] = useState(0);
+      const p = providers[selected];
+      if (!p) return <div style={{padding:20,color:"red"}}>No provider found.</div>;
+      const score = ((p.rating/5)*0.4 + (1/p.distance)*0.4 + (p.verified?0.2:0)).toFixed(2);
+      return (
+        <div style={{ display:"flex", flexDirection:"column", height:"100%", background:"#fff" }}>
+          <div style={{ padding:"16px 20px", background:COLORS.green, color:"#fff" }}>
+            <button onClick={onBack} style={{ background:"rgba(255,255,255,0.2)", border:"none", color:"#fff", borderRadius:8, padding:"4px 10px", cursor:"pointer", fontSize:13, marginBottom:8 }}>← Back</button>
+            <div style={{ fontSize:16, fontWeight:700 }}>✓ Best Match Found!</div>
+            <div style={{ fontSize:12, opacity:0.85, marginTop:2 }}>AI Score: {score} · {providers.length} providers evaluated</div>
+          </div>
+
+          {/* Provider tabs */}
+          {providers.length > 1 && (
+            <div style={{ display:"flex", gap:6, padding:"12px 20px 0", overflowX:"auto" }}>
+              {providers.map((pr,i) => (
+                <button key={i} onClick={() => setSelected(i)} style={{
+                  flexShrink:0, padding:"6px 12px", borderRadius:99, fontSize:12, fontWeight:600, cursor:"pointer",
+                  border:`1.5px solid`,
+                  borderColor: selected===i ? COLORS.green : COLORS.grayBorder,
+                  background: selected===i ? COLORS.green : COLORS.white,
+                  color: selected===i ? "#fff" : COLORS.gray,
+                }}>
+                  {i===0 ? "🏆 Best" : `#${i+1}`} {pr.name.split(" ")[0]}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div style={{ flex:1, overflowY:"auto", padding:"16px 20px" }}>
+            {/* Provider card */}
+            <div style={{ background:COLORS.grayLight, borderRadius:16, padding:"16px", marginBottom:14, border:`1px solid ${COLORS.grayBorder}` }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+                <div style={{ fontSize:17, fontWeight:700, color:COLORS.dark }}>{p.name}</div>
+                {p.verified && <span style={{ background:COLORS.greenLight, color:COLORS.green, fontSize:11, fontWeight:600, padding:"3px 8px", borderRadius:99 }}>✓ Verified</span>}
+              </div>
+              <div style={{ display:"flex", gap:6, flexWrap:"wrap", marginBottom:10 }}>
+                <span style={{ fontSize:13, color:COLORS.amber }}>{"★".repeat(Math.round(p.rating))} {p.rating}</span>
+                <span style={{ fontSize:12, color:"#9ca3af" }}>({p.reviews} reviews)</span>
+              </div>
+              <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, fontSize:12, color:COLORS.gray }}>
+                <div>📍 {p.sector}, Islamabad</div>
+                <div>📏 {p.distance} km away</div>
+                <div>💼 {p.experience} yrs exp.</div>
+                <div>📞 {p.phone}</div>
+                <div style={{ gridColumn:"1/-1" }}>💰 PKR {p.price[0].toLocaleString()} – {p.price[1].toLocaleString()}</div>
+              </div>
+            </div>
+
+            {/* Reasoning */}
+            <div style={{ background:"#fffbeb", border:`1px solid #fde68a`, borderRadius:12, padding:"12px 14px", marginBottom:14 }}>
+              <div style={{ fontSize:11, fontWeight:700, color:COLORS.amber, textTransform:"uppercase", letterSpacing:"0.05em", marginBottom:6 }}>🧠 Agent Reasoning</div>
+              <div style={{ fontSize:13, color:"#92400e", lineHeight:1.6 }}>
+                Selected <strong>{p.name}</strong> because: {p.distance < 2.5 ? "closest available" : "best rated"} in {p.sector} with {p.rating}★ rating and {p.experience} years experience.
+                Slot confirmed at <strong>{intent.timeLabel?.split(",")[1]?.trim() || "10:00 AM"}</strong>.
+              </div>
+            </div>
+
+            {/* Slot picker */}
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:12, fontWeight:600, color:"#9ca3af", textTransform:"uppercase", marginBottom:8 }}>Available Slots</div>
+              <div style={{ display:"flex", gap:6, flexWrap:"wrap" }}>
+                {p.slots.map((s,i) => (
+                  <span key={i} style={{
+                    padding:"6px 12px", borderRadius:8, fontSize:13, fontWeight:500,
+                    background: i===0 ? COLORS.green : COLORS.grayLight,
+                    color: i===0 ? "#fff" : COLORS.gray,
+                    border:`1px solid ${i===0 ? COLORS.green : COLORS.grayBorder}`
+                  }}>{s}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ padding:"16px 20px 24px", borderTop:`1px solid ${COLORS.grayBorder}`, display:"flex", flexDirection:"column", gap:8 }}>
+            <button onClick={() => onConfirm(p)} style={{
+              background:COLORS.green, color:"#fff", border:"none", borderRadius:12,
+              padding:"14px", fontSize:15, fontWeight:700, cursor:"pointer"
+            }}>✓ Confirm Booking</button>
+            <button onClick={onBack} style={{
+              background:"transparent", color:COLORS.green, border:`1.5px solid ${COLORS.green}`, borderRadius:12,
+              padding:"12px", fontSize:14, fontWeight:600, cursor:"pointer"
+            }}>← Change Request</button>
+          </div>
+        </div>
+      );
+    }
+
+    function ConfirmScreen({ booking, intent, provider, onNew }) {
+      const [checked, setChecked] = useState(false);
+      useEffect(() => { const t = setTimeout(() => setChecked(true), 400); return () => clearTimeout(t); }, []);
+      return (
+        <div style={{ display:"flex", flexDirection:"column", height:"100%", background:"#fff" }}>
+          <div style={{ padding:"28px 20px 20px", display:"flex", flexDirection:"column", alignItems:"center", borderBottom:`1px solid ${COLORS.grayBorder}` }}>
+            <div style={{
+              width:70, height:70, borderRadius:"50%", background:COLORS.green,
+              display:"flex", alignItems:"center", justifyContent:"center",
+              fontSize:36, transform: checked ? "scale(1)" : "scale(0)",
+              transition:"transform 0.4s cubic-bezier(0.34,1.56,0.64,1)"
+            }}>✓</div>
+            <div style={{ marginTop:12, fontSize:20, fontWeight:700, color:COLORS.dark }}>Booking Confirmed!</div>
+            <div style={{ fontSize:13, color:COLORS.green, marginTop:4 }}>Your service has been booked successfully</div>
+          </div>
+
+          <div style={{ flex:1, overflowY:"auto", padding:"16px 20px" }}>
+            {/* Receipt */}
+            <div style={{ background:COLORS.grayLight, borderRadius:16, overflow:"hidden", marginBottom:14, border:`1px solid ${COLORS.grayBorder}` }}>
+              <div style={{ background:COLORS.greenDark, color:"#fff", padding:"10px 16px", fontSize:12, fontWeight:700, textTransform:"uppercase", letterSpacing:"0.05em" }}>
+                Booking Receipt
+              </div>
+              {[
+                ["🔖 Booking ID", booking.id],
+                ["🛠️ Service", intent.service?.label],
+                ["👤 Provider", provider.name],
+                ["📞 Contact", provider.phone],
+                ["📍 Location", `${provider.sector}, Islamabad`],
+                ["📅 Date & Time", intent.timeLabel || "Tomorrow, 10:00 AM"],
+                ["💰 Price Est.", `PKR ${provider.price[0].toLocaleString()} – ${provider.price[1].toLocaleString()}`],
+                ["🟢 Status", "CONFIRMED"],
+              ].map(([k,v],i) => (
+                <div key={i} style={{
+                  display:"flex", justifyContent:"space-between", padding:"10px 16px",
+                  borderBottom: i < 7 ? `1px solid ${COLORS.grayBorder}` : "none",
+                  background: i%2===0 ? "#fff" : COLORS.grayLight
+                }}>
+                  <span style={{ fontSize:13, color:"#6b7280", fontWeight:500 }}>{k}</span>
+                  <span style={{ fontSize:13, color: k.includes("Status") ? COLORS.green : COLORS.dark, fontWeight: k.includes("Status") ? 700 : 500 }}>{v}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Reminder */}
+            <div style={{ background:COLORS.amberLight, border:`1px solid #fde68a`, borderRadius:12, padding:"12px 14px", marginBottom:14 }}>
+              <div style={{ fontSize:13, color:"#92400e", fontWeight:500 }}>
+                ⏰ Reminder scheduled 1 hour before your appointment
+              </div>
+              <div style={{ fontSize:12, color:COLORS.amber, marginTop:4 }}>Simulated SMS will be sent to your number</div>
+            </div>
+
+            {/* Trace */}
+            <div style={{ background:COLORS.dark, borderRadius:12, padding:"12px 14px", marginBottom:14 }}>
+              <div style={{ fontSize:11, color:"#4ade80", fontFamily:"monospace", fontWeight:700, marginBottom:6 }}>AGENT TRACE LOG</div>
+              {[
+                `[IntentAgent] lang=${intent.lang} service=${intent.service?.id} loc=${intent.location} conf=0.93`,
+                `[DiscoveryAgent] scanned ${PROVIDERS.filter(p=>p.category===intent.service?.id).length} providers → ${provider.id} selected`,
+                `[RankingAgent] score=${((provider.rating/5)*0.4+(1/provider.distance)*0.4+(provider.verified?0.2:0)).toFixed(2)} slot=${provider.slots[0]} verified=true`,
+                `[BookingAgent] booking_id=${booking.id} written to bookings.json ✓`,
+                `[BookingAgent] reminder scheduled at slot-1hr → reminders.json ✓`,
+              ].map((line,i) => (
+                <div key={i} style={{ fontSize:10, color:"#86efac", fontFamily:"monospace", lineHeight:1.7 }}>{line}</div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ padding:"16px 20px 24px", borderTop:`1px solid ${COLORS.grayBorder}`, display:"flex", flexDirection:"column", gap:8 }}>
+            <button onClick={onNew} style={{
+              background:COLORS.green, color:"#fff", border:"none", borderRadius:12,
+              padding:"14px", fontSize:15, fontWeight:700, cursor:"pointer"
+            }}>+ Book Another Service</button>
+          </div>
+        </div>
+      );
+    }
+
+    function HistoryScreen({ bookings }) {
+      if (bookings.length === 0) return (
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", height:"100%", color:"#9ca3af" }}>
+          <div style={{ fontSize:48, marginBottom:12 }}>📋</div>
+          <div style={{ fontSize:15, fontWeight:600 }}>No bookings yet</div>
+          <div style={{ fontSize:13, marginTop:4 }}>Your completed bookings will appear here</div>
+        </div>
+      );
+      return (
+        <div style={{ height:"100%", overflowY:"auto" }}>
+          <div style={{ padding:"20px 20px 8px", borderBottom:`1px solid ${COLORS.grayBorder}` }}>
+            <div style={{ fontSize:17, fontWeight:700, color:COLORS.dark }}>Booking History</div>
+            <div style={{ fontSize:12, color:"#9ca3af", marginTop:2 }}>{bookings.length} booking{bookings.length!==1?"s":""} total</div>
+          </div>
+          <div style={{ padding:"12px 20px", display:"flex", flexDirection:"column", gap:10 }}>
+            {bookings.slice().reverse().map((b,i) => (
+              <div key={i} style={{ background:COLORS.grayLight, borderRadius:14, padding:"14px", border:`1px solid ${COLORS.grayBorder}` }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+                  <div style={{ fontSize:14, fontWeight:700, color:COLORS.dark }}>{b.service}</div>
+                  <span style={{ background:COLORS.greenLight, color:COLORS.green, fontSize:11, fontWeight:600, padding:"3px 8px", borderRadius:99 }}>✓ Confirmed</span>
+                </div>
+                <div style={{ fontSize:12, color:COLORS.gray, lineHeight:1.8 }}>
+                  <div>👤 {b.provider}</div>
+                  <div>📍 {b.location} · 📅 {b.time}</div>
+                  <div>🔖 {b.id}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function KhidmatAI() {
+      const [screen, setScreen] = useState("home"); // home | thinking | providers | confirm | history
+      const [intent, setIntent] = useState(null);
+      const [providers, setProviders] = useState([]);
+      const [selectedProvider, setSelectedProvider] = useState(null);
+      const [booking, setBooking] = useState(null);
+      const [bookings, setBookings] = useState([]);
+      const [activeNav, setActiveNav] = useState("home");
+      const [missingField, setMissingField] = useState(null);
+      const [pendingService, setPendingService] = useState(null);
+      const [clarifyInput, setClarifyInput] = useState("");
+
+      function handleSend(text) {
+        const parsed = parseInput(text);
+        if (!parsed.service) { setMissingField("service"); setPendingService(parsed); setScreen("clarify"); return; }
+        if (!parsed.location) { setMissingField("location"); setPendingService(parsed); setScreen("clarify"); return; }
+        const found = findProviders(parsed);
+        setIntent(parsed);
+        setProviders(found);
+        setScreen("thinking");
+      }
+
+      function handleQuickService(service) {
+        setPendingService({ service, location:null, timeLabel:null, timeSlot:null, lang:"English", raw:service.label });
+        setMissingField("location");
+        setScreen("clarify");
+      }
+
+      function handleConfirm(provider) {
+        const id = genBookingId();
+        const b = { id, service:intent.service?.label, provider:provider.name, location:`${provider.sector}, Islamabad`, time:intent.timeLabel || "Tomorrow, 10:00 AM" };
+        setSelectedProvider(provider);
+        setBooking({ id });
+        setBookings(prev => [...prev, b]);
+        setScreen("confirm");
+      }
+
+      function handleClarify(answer) {
+        const updated = { ...pendingService, raw: pendingService.raw + " " + answer };
+        const reparsed = parseInput(updated.raw);
+        if (missingField === "service" && !reparsed.service) { alert("Service not recognized, please try again"); return; }
+        if (missingField === "location" && !reparsed.location) {
+          // try to match sector directly
+          const sec = LOC_SECTORS.find(s => answer.toUpperCase().includes(s));
+          if (sec) reparsed.location = sec;
+          else { alert("Location not found. Try a sector like G-13 or F-7"); return; }
+        }
+        const merged = { ...updated, ...reparsed };
+        if (!merged.service) { alert("Please specify service"); return; }
+        const found = findProviders(merged);
+        setIntent(merged);
+        setProviders(found);
+        setScreen("thinking");
+        setClarifyInput("");
+      }
+
+      const navItems = [
+        { id:"home", icon:"🏠", label:"Home" },
+        { id:"history", icon:"📋", label:"Bookings" },
+      ];
+
+      function navigate(id) {
+        setActiveNav(id);
+        if (id === "home") setScreen("home");
+        if (id === "history") setScreen("history");
+      }
+
+      return (
+        <div style={{ display:"flex", justifyContent:"center", alignItems:"center", minHeight:"100vh", background:"#1f2937", padding:"20px" }}>
+          {/* Phone frame */}
+          <div style={{
+            width:375, height:780, borderRadius:40, overflow:"hidden",
+            boxShadow:"0 40px 80px rgba(0,0,0,0.5), 0 0 0 8px #374151, 0 0 0 10px #4b5563",
+            display:"flex", flexDirection:"column", position:"relative", background:"#fff"
+          }}>
+            {/* Status bar */}
+            <div style={{ height:44, background: screen==="providers" ? COLORS.green : "#fff", display:"flex", alignItems:"center", justifyContent:"space-between", padding:"0 20px", flexShrink:0, transition: "background 0.3s" }}>
+              <span style={{ fontSize:13, fontWeight:600, color: screen==="providers" ? "#fff" : COLORS.dark }}>9:41</span>
+              <div style={{ width:120, height:20, background:"#111", borderRadius:10 }} />
+              <span style={{ fontSize:13, color: screen==="providers" ? "#fff" : COLORS.dark }}>● ● ●</span>
+            </div>
+
+            {/* Main content */}
+            <div style={{ flex:1, overflow:"hidden", position:"relative" }}>
+              {screen === "home" && <HomeScreen onSend={handleSend} onQuickService={handleQuickService} />}
+              {screen === "thinking" && intent && <ThinkingScreen intent={intent} providers={providers} onDone={() => setScreen("providers")} />}
+              {screen === "providers" && providers.length > 0 && <ProviderScreen providers={providers} intent={intent} onConfirm={handleConfirm} onBack={() => setScreen("home")} />}
+              {screen === "providers" && providers.length === 0 && (
+                <div style={{ padding:24 }}>
+                  <div style={{ fontSize:16, fontWeight:700, color:COLORS.dark, marginBottom:8 }}>No providers found</div>
+                  <div style={{ fontSize:13, color:COLORS.gray, marginBottom:16 }}>No {intent?.service?.label} available in {intent?.location} at the requested time.</div>
+                  <button onClick={() => setScreen("home")} style={{ background:COLORS.green, color:"#fff", border:"none", borderRadius:12, padding:"12px 20px", cursor:"pointer", fontWeight:600 }}>← Try Again</button>
+                </div>
+              )}
+              {screen === "confirm" && booking && intent && selectedProvider && (
+                <ConfirmScreen booking={booking} intent={intent} provider={selectedProvider} onNew={() => { setScreen("home"); setActiveNav("home"); }} />
+              )}
+              {screen === "history" && <HistoryScreen bookings={bookings} />}
+              {screen === "clarify" && (
+                <div style={{ display:"flex", flexDirection:"column", height:"100%", padding:20 }}>
+                  <div style={{ fontSize:17, fontWeight:700, color:COLORS.dark, marginBottom:6 }}>🤖 One quick question</div>
+                  <div style={{ fontSize:14, color:COLORS.gray, marginBottom:20, lineHeight:1.6 }}>
+                    {missingField === "service" && "Which service do you need? (e.g. AC repair, plumber, electrician)"}
+                    {missingField === "location" && `Where do you need ${pendingService?.service?.label || "this service"}? (e.g. G-13, F-7, G-9)`}
+                  </div>
+                  {missingField === "location" && (
+                    <div style={{ display:"flex", flexWrap:"wrap", gap:6, marginBottom:16 }}>
+                      {LOC_SECTORS.slice(0,8).map(s => (
+                        <button key={s} onClick={() => handleClarify(s)} style={{
+                          padding:"6px 14px", borderRadius:99, fontSize:13, fontWeight:600,
+                          background:COLORS.greenLight, color:COLORS.greenDark, border:`1px solid ${COLORS.green}`, cursor:"pointer"
+                        }}>{s}</button>
+                      ))}
+                    </div>
+                  )}
+                  {missingField === "service" && (
+                    <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:8, marginBottom:16 }}>
+                      {SERVICES.map(s => (
+                        <button key={s.id} onClick={() => {
+                          const merged = { ...pendingService, service:s, raw: (pendingService?.raw||"") + " " + s.label };
+                          if (!merged.location) { setPendingService(merged); setMissingField("location"); return; }
+                          const found = findProviders(merged);
+                          setIntent(merged); setProviders(found); setScreen("thinking");
+                        }} style={{
+                          padding:"10px", borderRadius:12, fontSize:13, fontWeight:600,
+                          background:COLORS.grayLight, color:COLORS.gray, border:`1px solid ${COLORS.grayBorder}`, cursor:"pointer",
+                          display:"flex", alignItems:"center", gap:6
+                        }}>
+                          <span>{s.emoji}</span> {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div style={{ display:"flex", gap:8, marginTop:"auto" }}>
+                    <input value={clarifyInput} onChange={e => setClarifyInput(e.target.value)}
+                      onKeyDown={e => e.key==="Enter" && handleClarify(clarifyInput)}
+                      placeholder="Type your answer..."
+                      style={{ flex:1, padding:"12px 14px", borderRadius:12, border:`1.5px solid ${COLORS.grayBorder}`, fontSize:13, outline:"none" }}
+                    />
+                    <button onClick={() => handleClarify(clarifyInput)} style={{ background:COLORS.green, color:"#fff", border:"none", borderRadius:12, padding:"12px 16px", cursor:"pointer", fontSize:18 }}>→</button>
+                  </div>
+                  <button onClick={() => setScreen("home")} style={{ marginTop:10, background:"transparent", border:"none", color:"#9ca3af", cursor:"pointer", fontSize:13 }}>← Back to Home</button>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom nav */}
+            <div style={{
+              height:64, borderTop:`1px solid ${COLORS.grayBorder}`, background:"#fff",
+              display:"flex", alignItems:"center", justifyContent:"space-around", flexShrink:0
+            }}>
+              {navItems.map(n => (
+                <button key={n.id} onClick={() => navigate(n.id)} style={{
+                  display:"flex", flexDirection:"column", alignItems:"center", gap:3,
+                  background:"none", border:"none", cursor:"pointer", padding:"8px 20px"
+                }}>
+                  <span style={{ fontSize:22 }}>{n.icon}</span>
+                  <span style={{ fontSize:11, fontWeight:600, color: activeNav===n.id ? COLORS.green : "#9ca3af" }}>{n.label}</span>
+                  {activeNav===n.id && <div style={{ width:20, height:2, background:COLORS.green, borderRadius:1 }} />}
+                </button>
+              ))}
+              <div style={{ fontSize:9, color:"#d1d5db", textAlign:"center", position:"absolute", bottom:4, left:"50%", transform:"translateX(-50%)", whiteSpace:"nowrap" }}>
+                Powered by Google Antigravity · Gemini
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<KhidmatAI />);
+  </script>
+</body>
+</html>

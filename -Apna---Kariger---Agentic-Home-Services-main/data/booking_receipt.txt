@@ -1,0 +1,41 @@
+=========================================
+          BOOKING CONFIRMATION
+=========================================
+Booking ID: BK-90952
+Status: CONFIRMED
+
+SERVICE DETAILS:
+----------------
+Service Type: AC Technician
+Requested By: User
+Location: G-13
+Scheduled Time: Tomorrow morning
+
+PROVIDER DETAILS:
+-----------------
+Provider Name: Ali AC Services
+Provider Rating: 4.8 / 5.0
+
+=========================================
+Thank you for using our service!
+
+=========================================
+          BOOKING CONFIRMATION
+=========================================
+Booking ID: BK-90953
+Status: CONFIRMED
+
+SERVICE DETAILS:
+----------------
+Service Type: Plumber
+Requested By: User
+Location: F-7
+Scheduled Time: Tomorrow afternoon
+
+PROVIDER DETAILS:
+-----------------
+Provider Name: Raza Plumbing F-7
+Provider Rating: 4.5 / 5.0
+
+=========================================
+Thank you for using our service!

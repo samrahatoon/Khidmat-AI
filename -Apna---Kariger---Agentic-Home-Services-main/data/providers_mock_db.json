@@ -1,0 +1,51 @@
+[
+  {
+    "id": "p1",
+    "name": "Ali AC Services",
+    "service": "ac_technician",
+    "location": ["G-13", "G-11", "F-11"],
+    "rating": 4.8,
+    "availability": ["morning", "afternoon"]
+  },
+  {
+    "id": "p2",
+    "name": "CoolBreeze Mechanics",
+    "service": "ac_technician",
+    "location": ["I-8", "I-10"],
+    "rating": 4.5,
+    "availability": ["morning"]
+  },
+  {
+    "id": "p3",
+    "name": "G-13 AC Experts",
+    "service": "ac_technician",
+    "location": ["G-13"],
+    "rating": 4.2,
+    "availability": ["evening"]
+  },
+  {
+    "id": "p4",
+    "name": "Fast Plumbers",
+    "service": "plumber",
+    "location": ["G-13"],
+    "rating": 4.9,
+  },
+  {
+    "id": "PRV015",
+    "name": "Raza Plumbing F-7",
+    "service": "plumber",
+    "location": ["F-7"],
+    "rating": 4.5,
+    "verified": true,
+    "availability": ["09:00", "10:00", "13:00", "14:00", "afternoon"]
+  },
+  {
+    "id": "PRV016",
+    "name": "Kareem Electric G-9",
+    "service": "electrician",
+    "location": ["G-9"],
+    "rating": 4.6,
+    "verified": true,
+    "availability": ["08:00", "09:00", "10:00", "14:00", "15:00", "afternoon"]
+  }
+]
